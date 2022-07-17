@@ -1,0 +1,52 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "MapboxCommon",
+        "repositoryURL": "https://github.com/mapbox/mapbox-common-ios.git",
+        "state": {
+          "branch": null,
+          "revision": "9c029c5de823bf7b25240321da04b60e96240d29",
+          "version": "22.0.0-beta.1"
+        }
+      },
+      {
+        "package": "MapboxCoreMaps",
+        "repositoryURL": "https://github.com/mapbox/mapbox-core-maps-ios.git",
+        "state": {
+          "branch": null,
+          "revision": "a61f79f698cde890291539d20e38c3ddaf3a8d14",
+          "version": "10.6.0-beta.3"
+        }
+      },
+      {
+        "package": "MapboxMobileEvents",
+        "repositoryURL": "https://github.com/mapbox/mapbox-events-ios.git",
+        "state": {
+          "branch": null,
+          "revision": "5e130fba637f5bbb0bb8bca0dec8d38a06ce07bf",
+          "version": "1.0.8"
+        }
+      },
+      {
+        "package": "MapboxMaps",
+        "repositoryURL": "https://github.com/mapbox/mapbox-maps-ios.git",
+        "state": {
+          "branch": "main",
+          "revision": "0229e4c6f2c14a83bd31b3e85af5864979d78c13",
+          "version": null
+        }
+      },
+      {
+        "package": "Turf",
+        "repositoryURL": "https://github.com/mapbox/turf-swift.git",
+        "state": {
+          "branch": null,
+          "revision": "569e0f0e96fda86e1a1dcefaefa68cfa9491ffc1",
+          "version": "2.4.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}
