@@ -22,6 +22,17 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.528431850647-56ush5rvja6drigfdjr8sp72s83jms8j</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
@@ -36,6 +47,10 @@
 	<string>Allow app to use network</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Allow app to use location</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>App needs access to photo lib for profile images</string>
+	<key>NSCameraUsageDescription</key>
+	<string>To capture profile photo please grant camera access</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Allow Location details</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

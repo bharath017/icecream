@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart';
+import 'package:icecream/Screens/AccountSettings.dart';
+import 'package:icecream/Screens/ResetPassword.dart';
 //import 'package:icecream/Models/User.dart';
 import 'package:icecream/Screens/TermsAndConditions.dart';
 import 'package:icecream/global/global.dart';
@@ -120,10 +122,11 @@ class _EditUserDetailsState extends State<EditUserDetails> {
                     },
                     // initialValue: "MailAddress",
                     controller: EmailController,
-                    readOnly: false,
+                    readOnly: true,
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.mail_outline),
-
+                      fillColor: Color.fromARGB(31, 164, 162, 162),
+                      filled: true,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10)),
                       labelText: 'Email Address',
@@ -150,10 +153,11 @@ class _EditUserDetailsState extends State<EditUserDetails> {
                       return null;
                     },
                     controller: PhoneController,
-                    readOnly: false,
+                    readOnly: true,
                     decoration: InputDecoration(
                       prefixIcon: Icon(Icons.call),
-
+                      fillColor: Color.fromARGB(31, 164, 162, 162),
+                      filled: true,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10)),
                       labelText: 'Phone Number',
@@ -171,31 +175,19 @@ class _EditUserDetailsState extends State<EditUserDetails> {
                 ),
                 Container(
                   padding: EdgeInsets.all(10),
-                  width: SizeConfig.widthMultiplier * 100,
-                  child: TextFormField(
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter Phone Number';
-                      }
-                      return null;
-                    },
-                    controller: PasswordController,
-                    decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.password),
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                      labelText: 'Password',
-                      isDense: true, // Added this
-                      contentPadding: EdgeInsets.all(14),
-                    ),
-                    obscureText: true,
-                    onChanged: (value) {
-                      if (value.isEmpty) {
-                        // formKey.currentState!.validate();
-                      }
-                      return null;
-                    },
-                  ),
+                  child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: MaterialStateProperty.all<Color>(
+                            Color.fromARGB(255, 195, 123, 255)),
+                      ),
+                      onPressed: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (c) => ResetPassword()));
+                      },
+                      child: Text(
+                        'Reset Password',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      )),
                 ),
                 Container(
                   alignment: Alignment.center,
@@ -244,38 +236,18 @@ class _EditUserDetailsState extends State<EditUserDetails> {
           );
         });
 
-    final User? firebaseUser = (await fAuth
-            .createUserWithEmailAndPassword(
-      email: EmailController.text.trim(),
-      password: PasswordController.text.trim(),
-    )
-            .catchError((msg) {
-      Navigator.pop(context);
-      Fluttertoast.showToast(msg: "Error: " + msg.toString());
-    }))
-        .user;
+    Map userMap = {
+      "FirstName": FirstNameController.text.trim(),
+      "LastName": LastNameController.text.trim(),
+    };
 
-    if (firebaseUser != null) {
-      Map userMap = {
-        "id": firebaseUser.uid,
-        "name":
-            FirstNameController.text.trim() + LastNameController.text.trim(),
-        "email": EmailController.text.trim(),
-        "phone": PhoneController.text.trim(),
-      };
+    DatabaseReference reference =
+        FirebaseDatabase.instance.ref().child("users");
+    reference.child(currentFirebaseUser!.uid).set(userMap);
 
-      DatabaseReference reference =
-          FirebaseDatabase.instance.ref().child("users");
-      reference.child(firebaseUser.uid).set(userMap);
-
-      currentFirebaseUser = firebaseUser;
-      Fluttertoast.showToast(msg: "Account has been Created.");
-      Navigator.push(
-          context, MaterialPageRoute(builder: (c) => TermsAndConditions()));
-    } else {
-      Navigator.pop(context);
-      Fluttertoast.showToast(msg: "Account has not been Created.");
-    }
+    Fluttertoast.showToast(msg: "Account details has been Updated.");
+    Navigator.push(
+        context, MaterialPageRoute(builder: (c) => AccountSettings()));
   }
 
   // SaveUser(User user) async {

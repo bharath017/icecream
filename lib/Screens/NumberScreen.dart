@@ -14,6 +14,8 @@ import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:http/http.dart';
 //import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 import 'package:twilio_flutter/twilio_flutter.dart';
 
@@ -157,9 +159,11 @@ class _EnterNumberState extends State<EnterNumber> {
       floatingActionButton: FloatingActionButton(
         disabledElevation: 1,
         onPressed: () {
+          print("sending mail");
           validateForm();
-          // verifyPhoneNumber();
+          //verifyPhoneNumber();
           // signInWithPhoneNumber();
+          //sendMail();
         },
         tooltip: 'Submit',
         child: const Icon(Icons.chevron_right, size: 40),
@@ -226,6 +230,16 @@ class _EnterNumberState extends State<EnterNumber> {
     PhoneCodeSent codeSent =
         (String verificationId, int? forceResendingToken) async {
       print("code sent");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => VerifyNumber(
+                  token: verificationId,
+                  number: phoneNumber,
+                  isMail: itIsEmail,
+                  // token: driversRef!.key
+                )),
+      );
       // showSnackbar('Please check your phone for the verification code.');
       _verificationId = verificationId;
       print(_verificationId);
@@ -281,23 +295,21 @@ class _EnterNumberState extends State<EnterNumber> {
         phoneNumber = countryCode + inputValue;
       }
 
-      var rng = Random();
-      var code = rng.nextInt(900000) + 100000;
-      twilioFlutter.sendSMS(
-          toNumber: '+917019202723',
-          messageBody: '$code is your verification code for icecream app');
-      Map data = {"number": phoneNumber, "code": code};
-      print(data);
-      driversRef =
-          FirebaseDatabase.instance.ref().child("NumberVerification").push();
-      driversRef!.set(data);
+      // var rng = Random();
+      // var code = rng.nextInt(900000) + 100000;
+      // twilioFlutter.sendSMS(
+      //     toNumber: '+917019202723',
+      //     messageBody: '$code is your verification code for icecream app');
+      // Map data = {"number": phoneNumber, "code": code};
+      // print(data);
+      // driversRef =
+      //     FirebaseDatabase.instance.ref().child("NumberVerification").push();
+      // driversRef!.set(data);
       Navigator.push(
         context,
         MaterialPageRoute(
             builder: (context) => VerifyNumber(
-                number: phoneNumber,
-                isMail: itIsEmail,
-                token: driversRef!.key)),
+                number: phoneNumber, isMail: itIsEmail, token: "thisIsAToken")),
       );
     }
   }

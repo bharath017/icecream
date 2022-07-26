@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -6,6 +9,11 @@ import 'package:icecream/Screens/EditUserDetails.dart';
 import 'package:icecream/Screens/EnterAddress.dart';
 import 'package:icecream/global/global.dart';
 import 'package:icecream/utils/size_config.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart';
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({super.key});
@@ -15,9 +23,30 @@ class AccountSettings extends StatefulWidget {
 }
 
 class _AccountSettingsState extends State<AccountSettings> {
-  DatabaseReference? driversRef;
+  DatabaseReference? UsersRef;
+  FirebaseStorage storage = FirebaseStorage.instance;
+
+// final FirebaseStorage storage1 = FirebaseStorage(
+//       app: Firestore.instance.app,
+//       storageBucket: 'gs://my-project.appspot.com');
+
+  late Uint8List imageBytes;
+  bool loaded = false;
+  String errorMsg = "";
   void initState() {
     super.initState();
+    storage
+        .ref()
+        .child('files')
+        .child(currentFirebaseUser!.uid)
+        .getData(10000000)
+        .then((data) => setState(() {
+              loaded = true;
+              imageBytes = data!;
+            }))
+        .catchError((e) => setState(() {
+              errorMsg = e.error;
+            }));
     WidgetsBinding.instance.addPostFrameCallback((_) => getUserDetails());
   }
 
@@ -29,16 +58,18 @@ class _AccountSettingsState extends State<AccountSettings> {
   var address = {};
   var ofAddress = {};
   getUserDetails() {
-    driversRef = FirebaseDatabase.instance.ref().child("users");
-    driversRef!.child(currentFirebaseUser!.uid).once().then((value) {
+    UsersRef = FirebaseDatabase.instance.ref().child("users");
+    print(currentFirebaseUser!.uid);
+    UsersRef!.child(currentFirebaseUser!.uid).once().then((value) {
       setState(() {
         var vvv = value.snapshot.value;
-        print(vvv);
+        print(vvv as Map);
         MailId = (value.snapshot.value as Map)['email'];
         userName = (value.snapshot.value as Map)['FirstName'];
         mobile = (value.snapshot.value as Map)['phone'];
         try {
-          address = (value.snapshot.value as Map)['address']['home'];
+          address = (value.snapshot.value as Map)['address'];
+          address = address["home"];
           homeAddress = address['BuildingName'] +
               ' ,' +
               address['FlatNo'] +
@@ -46,7 +77,7 @@ class _AccountSettingsState extends State<AccountSettings> {
               address['StreetAddress'] +
               ' ,' +
               address['PostCode'];
-        } on Exception catch (_) {
+        } catch (e) {
           homeAddress = "Click here to add address";
         }
         try {
@@ -58,7 +89,7 @@ class _AccountSettingsState extends State<AccountSettings> {
               ofAddress['StreetAddress'] +
               ' ,' +
               ofAddress['PostCode'];
-        } on Exception catch (_) {
+        } catch (e) {
           officeAddress = 'Click here to add address';
         }
       });
@@ -80,51 +111,63 @@ class _AccountSettingsState extends State<AccountSettings> {
               SizedBox(
                 height: 50,
               ),
-              Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 75,
-                    backgroundColor: Colors.grey.shade200,
-                    child: GestureDetector(
-                      onTap: () {},
-                      child: CircleAvatar(
-                        radius: 70,
-                        backgroundImage: AssetImage('assets/user.jpg'),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 5,
-                    right: 5,
-                    child: Container(
-                      child: Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Icon(Icons.add_a_photo,
-                            color: Color.fromARGB(255, 106, 106, 106)),
-                      ),
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                            width: 3,
-                            color: Colors.white,
-                          ),
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(
-                              50,
-                            ),
-                          ),
-                          color: Colors.white,
-                          boxShadow: [
-                            BoxShadow(
-                              offset: Offset(2, 4),
-                              color: Colors.black.withOpacity(
-                                0.3,
+              GestureDetector(
+                onTap: () {
+                  _showPicker(context);
+                },
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 75,
+                      backgroundColor: Colors.grey.shade200,
+                      child: GestureDetector(
+                        onTap: () {},
+                        child: loaded
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(100),
+                                child: Image.memory(
+                                  imageBytes,
+                                  fit: BoxFit.fill,
+                                ))
+                            : const CircleAvatar(
+                                radius: 70,
+                                backgroundImage: AssetImage('assets/user.jpg'),
                               ),
-                              blurRadius: 3,
-                            ),
-                          ]),
+                      ),
                     ),
-                  ),
-                ],
+                    Positioned(
+                      bottom: 5,
+                      right: 5,
+                      child: Container(
+                        child: Padding(
+                          padding: EdgeInsets.all(2.0),
+                          child: Icon(Icons.add_a_photo,
+                              color: Color.fromARGB(255, 106, 106, 106)),
+                        ),
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 3,
+                              color: Colors.white,
+                            ),
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(
+                                50,
+                              ),
+                            ),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                offset: Offset(2, 4),
+                                color: Colors.black.withOpacity(
+                                  0.3,
+                                ),
+                                blurRadius: 3,
+                              ),
+                            ]),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               Padding(
@@ -264,5 +307,132 @@ class _AccountSettingsState extends State<AccountSettings> {
             ]),
       ),
     );
+  }
+
+  String username = 'customerservice@learntounlock.com';
+  final smtpServer = SmtpServer('smtp.123-reg.co.uk',
+      port: 487,
+      username: 'customerservice@learntounlock.com',
+      password: '@Learntounlock1',
+      ssl: true);
+  sendMail() async {
+    var connection = PersistentConnection(smtpServer);
+
+    final message = Message()
+      ..from = Address(username, 'Icecream')
+      ..recipients.add("bharathgowda538@gmail.com")
+      ..subject = 'Verification Code'
+      ..text = 'This is the Verification code for icecream .';
+    // ..html = "<h1>Test</h1>\n<p>Hey! Here's some HTML content</p>";
+
+    try {
+      final sendReport =
+          await send(message, smtpServer, timeout: Duration(seconds: 30));
+      print('Message sent: ' + sendReport.toString());
+    } on MailerException catch (e) {
+      print(e);
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+    }
+    // print(message);
+    // // Send the first message
+    // await connection.send(message);
+
+    // // close the connection
+    // await connection.close();
+  }
+
+  void _showPicker(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return SafeArea(
+            child: Container(
+              child: Wrap(
+                children: <Widget>[
+                  ListTile(
+                      leading: new Icon(Icons.photo_library),
+                      title: new Text('Gallery'),
+                      onTap: () {
+                        imgFromGallery();
+                        Navigator.of(context).pop();
+                      }),
+                  ListTile(
+                    leading: new Icon(Icons.photo_camera),
+                    title: new Text('Camera'),
+                    onTap: () {
+                      imgFromCamera();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
+  File? _photo;
+  final ImagePicker _picker = ImagePicker();
+
+  Future imgFromGallery() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _photo = File(pickedFile.path);
+        uploadFile();
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
+  Future imgFromCamera() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+
+    setState(() {
+      if (pickedFile != null) {
+        _photo = File(pickedFile.path);
+        uploadFile();
+      } else {
+        print('No image selected.');
+      }
+    });
+  }
+
+  Future uploadFile() async {
+    if (_photo == null) return;
+    final fileName = currentFirebaseUser!.uid;
+    final destination = 'files/$fileName';
+
+    try {
+      final ref = FirebaseStorage.instance.ref(destination);
+      await ref.putFile(_photo!);
+      getPhoto();
+    } catch (e) {
+      print('error occured');
+    }
+  }
+
+  getPhoto() async {
+    setState(() {
+      loaded = false;
+    });
+
+    await storage
+        .ref()
+        .child('files')
+        .child(currentFirebaseUser!.uid)
+        .getData(10000000)
+        .then((data) => setState(() {
+              loaded = true;
+              imageBytes = data!;
+            }))
+        .catchError((e) => setState(() {
+              errorMsg = e.error;
+            }));
   }
 }

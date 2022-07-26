@@ -1,12 +1,13 @@
 import 'dart:math';
 
 import 'package:country_code_picker/country_code_picker.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:icecream/Screens/LoginOTP.dart';
+import 'package:icecream/Screens/NumberScreen.dart';
 import 'package:icecream/Screens/NumberVerificationScreen.dart';
-import 'package:icecream/Screens/VerifyMailorOTP.dart';
-import 'package:icecream/authentication/signup_screen.dart';
+import 'package:icecream/authentication/login_screen.dart';
 import 'package:icecream/global/global.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -19,17 +20,28 @@ import 'package:email_validator/email_validator.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:sms_autofill/sms_autofill.dart';
+import 'package:twilio_flutter/twilio_flutter.dart';
 
-class EnterMailorNumber extends StatefulWidget {
-  //const EnterNumber({super.key});
-  bool isMail;
-  EnterMailorNumber({Key? key, required this.isMail}) : super(key: key);
+class LoginWithNumber extends StatefulWidget {
+  //const LoginWithNumber({super.key});
+
   @override
-  State<EnterMailorNumber> createState() => _EnterMailorNumberState();
+  State<LoginWithNumber> createState() => _LoginWithNumberState();
 }
 
-class _EnterMailorNumberState extends State<EnterMailorNumber> {
+class _LoginWithNumberState extends State<LoginWithNumber> {
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  late TwilioFlutter twilioFlutter;
+  @override
+  void initState() {
+    twilioFlutter = TwilioFlutter(
+        accountSid: accountSid,
+        authToken: authToken,
+        twilioNumber: twilioNumber);
+    super.initState();
+  }
+
+  DatabaseReference? driversRef;
   bool isEmail(String input) => EmailValidator.validate(input);
   bool isPhone(String input) =>
       RegExp(r'^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$')
@@ -47,35 +59,15 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
   PhoneNumber number = PhoneNumber(isoCode: 'IN');
   String pno = '';
   String inputValue = '';
-  double multiplier = 80;
+  bool itIsEmail = false;
+  double multiplier = 60;
   String countryCode = '';
-  DatabaseReference? driversRef;
-  void initState() {
-    super.initState();
-    setTexts();
-  }
-
-  String headerText = '';
-  String Secondary = '';
-  String hintText = '';
-  setTexts() {
-    if (widget.isMail) {
-      headerText = "Enter your phone number.....";
-      Secondary = "We'll text a code to verify your number";
-      hintText = "Enter your phone number";
-    } else {
-      headerText = "Enter your Email Address.....";
-      Secondary = "We'll text a code to verify your Email Address";
-      hintText = "Enter your Mail Address";
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    print(widget.isMail);
     return Scaffold(
       appBar: AppBar(
-        title: Text("Welcome"),
+        title: Text("Login"),
         centerTitle: true,
       ),
       body: Container(
@@ -87,30 +79,31 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Center(
-                  //   child: Image.asset(
-                  //     "images/icecreamtruck.jpg",
-                  //     height: 250,
-                  //     width: 250,
-                  //     alignment: Alignment.center,
-                  //   ),
-                  // ),
-                  Padding(
+                  Center(
+                    child: Image.asset(
+                      "assets/phone.webp",
+                      height: 250,
+                      width: 250,
+                      alignment: Alignment.center,
+                    ),
+                  ),
+                  const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Text(
-                      headerText,
+                      "What's your number ?",
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  Padding(
+                  const Padding(
                     padding: EdgeInsets.all(8.0),
-                    child: Text(Secondary, style: TextStyle(fontSize: 14)),
+                    child: Text("We'll text a code to verify your number",
+                        style: TextStyle(fontSize: 14)),
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      widget.isMail
+                      !itIsEmail
                           ? CountryCodePicker(
                               onChanged: (value) => {
                                 countryCode = value.dialCode!,
@@ -127,12 +120,11 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
                             )
                           : Container(),
                       Container(
-                        width: SizeConfig.widthMultiplier *
-                            (widget.isMail ? 60 : 80),
+                        width: SizeConfig.widthMultiplier * multiplier,
                         child: TextFormField(
                           validator: (value) {
                             if (!isEmail(value!) && !isPhone(value)) {
-                              if (!isEmail(value) && !widget.isMail) {
+                              if (!isEmail(value) && itIsEmail) {
                                 return 'Please enter a valid email .';
                               }
                               if (!isPhone(value)) {
@@ -144,11 +136,11 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
                           controller: newcontroller,
                           onChanged: (value) {
                             inputValue = value;
-                            //  validateString(value);
+                            validateString(value);
                           },
                           decoration: InputDecoration(
                             contentPadding: const EdgeInsets.all(16.0),
-                            hintText: hintText,
+                            hintText: "Enter your phone number or email",
                             filled: true,
                             fillColor: Colors.grey.withOpacity(0.1),
                           ),
@@ -156,6 +148,54 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
                       ),
                     ],
                   ),
+                  Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (c) => EnterNumber()));
+                        },
+                        child: const Text(
+                          "Do not have an Account? SignUp Here",
+                          style: TextStyle(
+                              color: Color.fromARGB(255, 45, 147, 250)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    height: 180,
+                  ),
+                  Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.fromLTRB(20, 10, 10, 20),
+                    color: Colors.transparent,
+                    width: SizeConfig.widthMultiplier * 60,
+                    height: 80,
+                    child: TextButton(
+                      style: ButtonStyle(
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.0),
+                                      side: BorderSide(
+                                          color: Color.fromARGB(
+                                              255, 71, 207, 252))))),
+                      onPressed: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (c) => LoginScreen()));
+                      },
+                      child: Text(
+                        "Login with Email address and Password",
+                        style: TextStyle(
+                          color: Color.fromARGB(255, 71, 207, 252),
+                          fontFamily: 'Raleway',
+                          fontSize: 16.0,
+                        ),
+                      ),
+                    ),
+                  )
                 ]),
           ),
         ),
@@ -163,10 +203,11 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
       floatingActionButton: FloatingActionButton(
         disabledElevation: 1,
         onPressed: () {
-          //  validateForm();
-          sendMail();
-          // verifyPhoneNumber();
+          print("sending mail");
+          validateForm();
+          //verifyPhoneNumber();
           // signInWithPhoneNumber();
+          //sendMail();
         },
         tooltip: 'Submit',
         child: const Icon(Icons.chevron_right, size: 40),
@@ -207,19 +248,19 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
         .hasMatch(num_mail);
   }
 
-  // validateString(String val) {
-  //   if (RegExp(r'^[0-9]+$').hasMatch(val)) {
-  //     setState(() {
-  //       multiplier = 60;
-  //       widget.isMail = false;
-  //     });
-  //   } else {
-  //     setState(() {
-  //       multiplier = 80;
-  //       widget.isMail = true;
-  //     });
-  //   }
-  // }
+  validateString(String val) {
+    if (RegExp(r'^[0-9]+$').hasMatch(val)) {
+      setState(() {
+        multiplier = 60;
+        itIsEmail = false;
+      });
+    } else {
+      setState(() {
+        multiplier = 80;
+        itIsEmail = true;
+      });
+    }
+  }
 
   verifyPhoneNumber() async {
     PhoneVerificationCompleted verificationCompleted =
@@ -233,6 +274,16 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
     PhoneCodeSent codeSent =
         (String verificationId, int? forceResendingToken) async {
       print("code sent");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => LoginOTP(
+                  token: verificationId,
+                  number: phoneNumber,
+                  isMail: itIsEmail,
+                  // token: driversRef!.key
+                )),
+      );
       // showSnackbar('Please check your phone for the verification code.');
       _verificationId = verificationId;
       print(_verificationId);
@@ -265,68 +316,6 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
     }
   }
 
-  String username = 'customerservice@learntounlock.com';
-  final gsmtp = SmtpServer('smtp.gmail.com',
-      port: 465,
-      ssl: true,
-      name: "LearnToUnlock",
-      username: "learntounlockuk@gmail.com",
-      password: "Bharath@1",
-      allowInsecure: true);
-  final smtpServer = SmtpServer('smtp.123-reg.co.uk',
-      port: 465,
-      username: 'customerservice@learntounlock.com',
-      password: '@Learntounlock1',
-      ssl: true);
-  sendMail() async {
-    var rng = Random();
-    var code = rng.nextInt(900000) + 100000;
-    print(inputValue);
-    Map data = {"email": inputValue, "code": code};
-    final message = Message()
-      ..from = Address(username, 'Icecream')
-      ..recipients.add(inputValue)
-      ..subject = 'Verification Code'
-      ..text = 'This is the Verification code for icecream $code.';
-    // ..html = "<h1>Test</h1>\n<p>Hey! Here's some HTML content</p>";
-
-    try {
-      final sendReport =
-          await send(message, gsmtp, timeout: Duration(seconds: 30));
-      print('Message sent: ' + sendReport.toString());
-
-      print(data);
-      if (!widget.isMail) {
-        MailAddress = inputValue;
-      } else {
-        phoneNumber = countryCode + inputValue;
-      }
-      driversRef =
-          FirebaseDatabase.instance.ref().child("NumberVerification").push();
-      driversRef!.set(data);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-            builder: (context) => VerifyNumberorMail(
-                number: inputValue,
-                isMail: widget.isMail,
-                token: driversRef!.key!)),
-      );
-    } on MailerException catch (e) {
-      print(e);
-      print('Message not sent.');
-      for (var p in e.problems) {
-        print('Problem: ${p.code}: ${p.msg}');
-      }
-    }
-    // print(message);
-    // // Send the first message
-    // await connection.send(message);
-
-    // // close the connection
-    // await connection.close();
-  }
-
   void signInWithPhoneNumber() async {
     try {
       final AuthCredential credential = PhoneAuthProvider.credential(
@@ -344,19 +333,27 @@ class _EnterMailorNumberState extends State<EnterMailorNumber> {
 
   validateForm() {
     if (formKey.currentState!.validate()) {
-      if (!widget.isMail) {
+      if (itIsEmail) {
         MailAddress = inputValue;
       } else {
         phoneNumber = countryCode + inputValue;
       }
+
+      // var rng = Random();
+      // var code = rng.nextInt(900000) + 100000;
+      // twilioFlutter.sendSMS(
+      //     toNumber: '+917019202723',
+      //     messageBody: '$code is your verification code for icecream app');
+      // Map data = {"number": phoneNumber, "code": code};
+      // print(data);
+      // driversRef =
+      //     FirebaseDatabase.instance.ref().child("NumberVerification").push();
+      // driversRef!.set(data);
       Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => VerifyNumberorMail(
-                  number: inputValue,
-                  isMail: widget.isMail,
-                  token: "tokennn",
-                )),
+            builder: (context) => LoginOTP(
+                number: phoneNumber, isMail: itIsEmail, token: "thisIsAToken")),
       );
     }
   }

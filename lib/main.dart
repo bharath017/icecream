@@ -1,10 +1,13 @@
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:icecream/Screens/AccountSettings.dart';
 import 'package:icecream/Screens/AddPhoto.dart';
+import 'package:icecream/Screens/EnterMailorNumber.dart';
 import 'package:icecream/Screens/NumberScreen.dart';
 import 'package:icecream/Screens/PaymentScreen.dart';
 import 'package:icecream/Screens/TermsAndConditions.dart';
@@ -48,6 +51,11 @@ import 'package:provider/provider.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  HttpOverrides.global = MyHttpOverrides();
+  ByteData data =
+      await PlatformAssetBundle().load('assets/lets-encrypt-r3.pem');
+  SecurityContext.defaultContext
+      .setTrustedCertificatesBytes(data.buffer.asUint8List());
 
   runApp(MyApp(
       child: ChangeNotifierProvider(
@@ -60,7 +68,7 @@ void main() async {
                 theme: ThemeData(
                   primarySwatch: Colors.blue,
                 ),
-                home: const MySplashScreen(),
+                home: EnterMailorNumber(isMail: false),
                 // home: const AddPhoto(),
                 debugShowCheckedModeBanner: false,
               );

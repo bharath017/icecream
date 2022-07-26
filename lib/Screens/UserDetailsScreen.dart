@@ -251,38 +251,58 @@ class _UserDetailsState extends State<UserDetails> {
           );
         });
 
-    final User? firebaseUser = (await fAuth
-            .createUserWithEmailAndPassword(
-      email: EmailController.text.trim(),
-      password: PasswordController.text.trim(),
-    )
-            .catchError((msg) {
-      Navigator.pop(context);
-      Fluttertoast.showToast(msg: "Error: " + msg.toString());
-    }))
-        .user;
+    // final User? firebaseUser = (await fAuth
+    //         .createUserWithEmailAndPassword(
+    //   email: EmailController.text.trim(),
+    //   password: PasswordController.text.trim(),
+    // )
+    //         .catchError((msg) {
+    //   Navigator.pop(context);
+    //   Fluttertoast.showToast(msg: "Error: " + msg.toString());
+    // }))
+    //     .user;
 
-    if (firebaseUser != null) {
-      Map userMap = {
-        "id": firebaseUser.uid,
-        "FirstName": FirstNameController.text.trim(),
-        "LastName": LastNameController.text.trim(),
-        "email": EmailController.text.trim(),
-        "phone": PhoneController.text.trim(),
-      };
+    final credential = EmailAuthProvider.credential(
+        email: EmailController.text.trim(),
+        password: PasswordController.text.trim());
 
-      DatabaseReference reference =
-          FirebaseDatabase.instance.ref().child("users");
-      reference.child(firebaseUser.uid).set(userMap);
-
-      currentFirebaseUser = firebaseUser;
-      Fluttertoast.showToast(msg: "Account has been Created.");
-      Navigator.push(
-          context, MaterialPageRoute(builder: (c) => TermsAndConditions()));
-    } else {
-      Navigator.pop(context);
-      Fluttertoast.showToast(msg: "Account has not been Created.");
+    try {
+      final userCredential = await FirebaseAuth.instance.currentUser
+          ?.linkWithCredential(credential);
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case "provider-already-linked":
+          print("The provider has already been linked to the user.");
+          break;
+        case "invalid-credential":
+          print("The provider's credential is not valid.");
+          break;
+        case "credential-already-in-use":
+          print("The account corresponding to the credential already exists, "
+              "or is already linked to a Firebase User.");
+          break;
+        // See the API reference for the full list of error codes.
+        default:
+          print("Unknown error.");
+      }
     }
+    Map userMap = {
+      "id": currentFirebaseUser!.uid,
+      "FirstName": FirstNameController.text.trim(),
+      "LastName": LastNameController.text.trim(),
+      "email": EmailController.text.trim(),
+      "phone": PhoneController.text.trim(),
+    };
+
+    DatabaseReference reference =
+        FirebaseDatabase.instance.ref().child("users");
+    reference.child(currentFirebaseUser!.uid).set(userMap);
+
+    currentFirebaseUser = currentFirebaseUser;
+    Fluttertoast.showToast(msg: "Account has been Created.");
+    Navigator.pop(context);
+    Navigator.push(
+        context, MaterialPageRoute(builder: (c) => TermsAndConditions()));
   }
 
   // SaveUser(User user) async {

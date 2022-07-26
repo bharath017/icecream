@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:icecream/Screens/LoginWithNumber.dart';
 import 'package:icecream/Screens/NumberScreen.dart';
 import 'package:icecream/assistants/assistant_methods.dart';
 import 'package:icecream/authentication/login_screen.dart';
@@ -26,7 +27,7 @@ class _MySplashScreenState extends State<MySplashScreen> {
             context, MaterialPageRoute(builder: (c) => MainScreen()));
       } else {
         Navigator.push(
-            context, MaterialPageRoute(builder: (c) => LoginScreen()));
+            context, MaterialPageRoute(builder: (c) => LoginWithNumber()));
       }
     });
   }

@@ -7,7 +7,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_geofire/flutter_geofire.dart';
+//import 'package:flutter_geofire/flutter_geofire.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geolocator/geolocator.dart';
@@ -282,7 +282,7 @@ class _MainScreenState extends State<MainScreen> {
     userName = userModelCurrentInfo!.name!;
     userEmail = userModelCurrentInfo!.email!;
 
-    initializeGeoFireListener();
+    // initializeGeoFireListener();
   }
 
   @override
@@ -1006,7 +1006,7 @@ class _MainScreenState extends State<MainScreen> {
           speed: -1.0,
           speedAccuracy: -1.0);
       userCurrentPosition = userPosition;
-      initializeGeoFireListener();
+      //  initializeGeoFireListener();
       circlesSet.clear();
     } else {
       Fluttertoast.showToast(
@@ -1170,224 +1170,224 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   double maxKm = 8;
-  initializeGeoFireListener() {
-    Geofire.initialize("activeDrivers");
+  // initializeGeoFireListener() {
+  //   Geofire.initialize("activeDrivers");
 
-    showModalBottomSheet(
-      context: context,
-      isDismissible: true,
-      backgroundColor: Color.fromARGB(255, 250, 250, 249),
-      elevation: 10,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15.0),
-      ),
-      builder: (BuildContext context) {
-        return Container(
-          padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
-          height: 250,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: const <Widget>[
-                Image(
-                    image: AssetImage("assets/truck.png"),
-                    height: 100,
-                    width: 120),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text('Looking for Trucks near by'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  //   showModalBottomSheet(
+  //     context: context,
+  //     isDismissible: true,
+  //     backgroundColor: Color.fromARGB(255, 250, 250, 249),
+  //     elevation: 10,
+  //     shape: RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.circular(15.0),
+  //     ),
+  //     builder: (BuildContext context) {
+  //       return Container(
+  //         padding: EdgeInsets.fromLTRB(0, 20, 0, 20),
+  //         height: 250,
+  //         child: Center(
+  //           child: Column(
+  //             mainAxisAlignment: MainAxisAlignment.start,
+  //             children: const <Widget>[
+  //               Image(
+  //                   image: AssetImage("assets/truck.png"),
+  //                   height: 100,
+  //                   width: 120),
+  //               Padding(
+  //                 padding: EdgeInsets.all(8.0),
+  //                 child: Text('Looking for Trucks near by'),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
 
-    Geofire.queryAtLocation(userCurrentPosition!.latitude,
-            userCurrentPosition!.longitude, userRadius)!
-        .listen((map) {
-      print("Listeninggggg");
-      if (map != null) {
-        var callBack = map['callBack'];
-        print(map['key']);
-        if (map['result'].toString() == '[]') {
-          print("empty data");
-          if (userRadius + 1.6 > maxKm) {
-            userRadius = userRadius;
-            //  Navigator.pop(context);
-            Fluttertoast.showToast(
-                msg: "No Trucks Found. Try After some time...!!");
-          } else {
-            setState(() {
-              userRadius = userRadius + 1.6;
-            });
-            // Geofire.stopListener();
-            increaseRadius();
-          }
-        } else {
-          if (!closed) {
-            Navigator.pop(context);
-            closed = true;
-          }
-        }
-        switch (callBack) {
-          //whenever any driver become active/online
-          case Geofire.onKeyEntered:
-            ActiveNearbyAvailableDrivers activeNearbyAvailableDriver =
-                ActiveNearbyAvailableDrivers();
-            activeNearbyAvailableDriver.locationLatitude = map['latitude'];
-            activeNearbyAvailableDriver.locationLongitude = map['longitude'];
-            activeNearbyAvailableDriver.driverId = map['key'];
-            GeoFireAssistant.activeNearbyAvailableDriversList
-                .add(activeNearbyAvailableDriver);
-            if (activeNearbyDriverKeysLoaded == true) {
-              displayActiveDriversOnUsersMap();
-            }
-            break;
+  //   Geofire.queryAtLocation(userCurrentPosition!.latitude,
+  //           userCurrentPosition!.longitude, userRadius)!
+  //       .listen((map) {
+  //     print("Listeninggggg");
+  //     if (map != null) {
+  //       var callBack = map['callBack'];
+  //       print(map['key']);
+  //       if (map['result'].toString() == '[]') {
+  //         print("empty data");
+  //         if (userRadius + 1.6 > maxKm) {
+  //           userRadius = userRadius;
+  //           //  Navigator.pop(context);
+  //           Fluttertoast.showToast(
+  //               msg: "No Trucks Found. Try After some time...!!");
+  //         } else {
+  //           setState(() {
+  //             userRadius = userRadius + 1.6;
+  //           });
+  //           // Geofire.stopListener();
+  //           increaseRadius();
+  //         }
+  //       } else {
+  //         if (!closed) {
+  //           Navigator.pop(context);
+  //           closed = true;
+  //         }
+  //       }
+  //       switch (callBack) {
+  //         //whenever any driver become active/online
+  //         case Geofire.onKeyEntered:
+  //           ActiveNearbyAvailableDrivers activeNearbyAvailableDriver =
+  //               ActiveNearbyAvailableDrivers();
+  //           activeNearbyAvailableDriver.locationLatitude = map['latitude'];
+  //           activeNearbyAvailableDriver.locationLongitude = map['longitude'];
+  //           activeNearbyAvailableDriver.driverId = map['key'];
+  //           GeoFireAssistant.activeNearbyAvailableDriversList
+  //               .add(activeNearbyAvailableDriver);
+  //           if (activeNearbyDriverKeysLoaded == true) {
+  //             displayActiveDriversOnUsersMap();
+  //           }
+  //           break;
 
-          //whenever any driver become non-active/offline
-          case Geofire.onKeyExited:
-            GeoFireAssistant.deleteOfflineDriverFromList(map['key']);
-            displayActiveDriversOnUsersMap();
-            break;
+  //         //whenever any driver become non-active/offline
+  //         case Geofire.onKeyExited:
+  //           GeoFireAssistant.deleteOfflineDriverFromList(map['key']);
+  //           displayActiveDriversOnUsersMap();
+  //           break;
 
-          //whenever driver moves - update driver location
-          case Geofire.onKeyMoved:
-            ActiveNearbyAvailableDrivers activeNearbyAvailableDriver =
-                ActiveNearbyAvailableDrivers();
-            activeNearbyAvailableDriver.locationLatitude = map['latitude'];
-            activeNearbyAvailableDriver.locationLongitude = map['longitude'];
-            activeNearbyAvailableDriver.driverId = map['key'];
-            GeoFireAssistant.updateActiveNearbyAvailableDriverLocation(
-                activeNearbyAvailableDriver);
-            displayActiveDriversOnUsersMap();
-            break;
+  //         //whenever driver moves - update driver location
+  //         case Geofire.onKeyMoved:
+  //           ActiveNearbyAvailableDrivers activeNearbyAvailableDriver =
+  //               ActiveNearbyAvailableDrivers();
+  //           activeNearbyAvailableDriver.locationLatitude = map['latitude'];
+  //           activeNearbyAvailableDriver.locationLongitude = map['longitude'];
+  //           activeNearbyAvailableDriver.driverId = map['key'];
+  //           GeoFireAssistant.updateActiveNearbyAvailableDriverLocation(
+  //               activeNearbyAvailableDriver);
+  //           displayActiveDriversOnUsersMap();
+  //           break;
 
-          //display those online/active drivers on user's map
-          case Geofire.onGeoQueryReady:
-            activeNearbyDriverKeysLoaded = true;
-            displayActiveDriversOnUsersMap();
-            break;
-        }
-      } else {
-        print("No drivers found");
-      }
-    });
+  //         //display those online/active drivers on user's map
+  //         case Geofire.onGeoQueryReady:
+  //           activeNearbyDriverKeysLoaded = true;
+  //           displayActiveDriversOnUsersMap();
+  //           break;
+  //       }
+  //     } else {
+  //       print("No drivers found");
+  //     }
+  //   });
 
-    LatLng userLatLng =
-        LatLng(userCurrentPosition!.latitude, userCurrentPosition!.longitude);
-    Circle userCircle = Circle(
-      visible: true,
-      circleId: const CircleId("userId"),
-      fillColor: Colors.transparent,
-      radius: 1000 * userRadius,
-      strokeWidth: 2,
-      strokeColor: Color.fromARGB(255, 99, 234, 249),
-      center: userLatLng,
-    );
-    setState(() {
-      circlesSet.add(userCircle);
-    });
-    print("Got drivers list");
+  //   LatLng userLatLng =
+  //       LatLng(userCurrentPosition!.latitude, userCurrentPosition!.longitude);
+  //   Circle userCircle = Circle(
+  //     visible: true,
+  //     circleId: const CircleId("userId"),
+  //     fillColor: Colors.transparent,
+  //     radius: 1000 * userRadius,
+  //     strokeWidth: 2,
+  //     strokeColor: Color.fromARGB(255, 99, 234, 249),
+  //     center: userLatLng,
+  //   );
+  //   setState(() {
+  //     circlesSet.add(userCircle);
+  //   });
+  //   print("Got drivers list");
 
-    print("Closed");
-    // Geofire.stopListener();
-  }
+  //   print("Closed");
+  //   // Geofire.stopListener();
+  // }
 
-  increaseRadius() {
-    Geofire.queryAtLocation(userCurrentPosition!.latitude,
-            userCurrentPosition!.longitude, userRadius)!
-        .listen((map) {
-      if (map != null) {
-        var callBack = map['callBack'];
-        print(map['result']);
-        if (map['result'].toString() == '[]') {
-          print("empty data");
-          if (userRadius + 1.6 > maxKm) {
-            userRadius = userRadius;
-            // Navigator.pop(context);
-            Fluttertoast.showToast(
-                msg: "No Trucks Found. Try After some time...!!");
-          } else {
-            setState(() {
-              userRadius = userRadius + 1.6;
-            });
-            // Geofire.stopListener();
-            // increaseRadius();
-          }
-        } else {
-          if (!closed) {
-            Navigator.pop(context);
-            closed = true;
-          }
-        }
-        switch (callBack) {
-          //whenever any driver become active/online
-          case Geofire.onKeyEntered:
-            ActiveNearbyAvailableDrivers activeNearbyAvailableDriver =
-                ActiveNearbyAvailableDrivers();
-            activeNearbyAvailableDriver.locationLatitude = map['latitude'];
-            activeNearbyAvailableDriver.locationLongitude = map['longitude'];
-            activeNearbyAvailableDriver.driverId = map['key'];
-            GeoFireAssistant.activeNearbyAvailableDriversList
-                .add(activeNearbyAvailableDriver);
-            if (activeNearbyDriverKeysLoaded == true) {
-              displayActiveDriversOnUsersMap();
-            }
-            break;
+  // increaseRadius() {
+  //   Geofire.queryAtLocation(userCurrentPosition!.latitude,
+  //           userCurrentPosition!.longitude, userRadius)!
+  //       .listen((map) {
+  //     if (map != null) {
+  //       var callBack = map['callBack'];
+  //       print(map['result']);
+  //       if (map['result'].toString() == '[]') {
+  //         print("empty data");
+  //         if (userRadius + 1.6 > maxKm) {
+  //           userRadius = userRadius;
+  //           // Navigator.pop(context);
+  //           Fluttertoast.showToast(
+  //               msg: "No Trucks Found. Try After some time...!!");
+  //         } else {
+  //           setState(() {
+  //             userRadius = userRadius + 1.6;
+  //           });
+  //           // Geofire.stopListener();
+  //           // increaseRadius();
+  //         }
+  //       } else {
+  //         if (!closed) {
+  //           Navigator.pop(context);
+  //           closed = true;
+  //         }
+  //       }
+  //       switch (callBack) {
+  //         //whenever any driver become active/online
+  //         case Geofire.onKeyEntered:
+  //           ActiveNearbyAvailableDrivers activeNearbyAvailableDriver =
+  //               ActiveNearbyAvailableDrivers();
+  //           activeNearbyAvailableDriver.locationLatitude = map['latitude'];
+  //           activeNearbyAvailableDriver.locationLongitude = map['longitude'];
+  //           activeNearbyAvailableDriver.driverId = map['key'];
+  //           GeoFireAssistant.activeNearbyAvailableDriversList
+  //               .add(activeNearbyAvailableDriver);
+  //           if (activeNearbyDriverKeysLoaded == true) {
+  //             displayActiveDriversOnUsersMap();
+  //           }
+  //           break;
 
-          //whenever any driver become non-active/offline
-          case Geofire.onKeyExited:
-            GeoFireAssistant.deleteOfflineDriverFromList(map['key']);
-            displayActiveDriversOnUsersMap();
-            break;
+  //         //whenever any driver become non-active/offline
+  //         case Geofire.onKeyExited:
+  //           GeoFireAssistant.deleteOfflineDriverFromList(map['key']);
+  //           displayActiveDriversOnUsersMap();
+  //           break;
 
-          //whenever driver moves - update driver location
-          case Geofire.onKeyMoved:
-            ActiveNearbyAvailableDrivers activeNearbyAvailableDriver =
-                ActiveNearbyAvailableDrivers();
-            activeNearbyAvailableDriver.locationLatitude = map['latitude'];
-            activeNearbyAvailableDriver.locationLongitude = map['longitude'];
-            activeNearbyAvailableDriver.driverId = map['key'];
-            GeoFireAssistant.updateActiveNearbyAvailableDriverLocation(
-                activeNearbyAvailableDriver);
-            displayActiveDriversOnUsersMap();
-            break;
+  //         //whenever driver moves - update driver location
+  //         case Geofire.onKeyMoved:
+  //           ActiveNearbyAvailableDrivers activeNearbyAvailableDriver =
+  //               ActiveNearbyAvailableDrivers();
+  //           activeNearbyAvailableDriver.locationLatitude = map['latitude'];
+  //           activeNearbyAvailableDriver.locationLongitude = map['longitude'];
+  //           activeNearbyAvailableDriver.driverId = map['key'];
+  //           GeoFireAssistant.updateActiveNearbyAvailableDriverLocation(
+  //               activeNearbyAvailableDriver);
+  //           displayActiveDriversOnUsersMap();
+  //           break;
 
-          //display those online/active drivers on user's map
-          case Geofire.onGeoQueryReady:
-            activeNearbyDriverKeysLoaded = true;
-            displayActiveDriversOnUsersMap();
-            break;
-        }
-      } else {
-        print("No drivers found");
-      }
-    });
+  //         //display those online/active drivers on user's map
+  //         case Geofire.onGeoQueryReady:
+  //           activeNearbyDriverKeysLoaded = true;
+  //           displayActiveDriversOnUsersMap();
+  //           break;
+  //       }
+  //     } else {
+  //       print("No drivers found");
+  //     }
+  //   });
 
-    circlesSet.clear();
-    LatLng userLatLng =
-        LatLng(userCurrentPosition!.latitude, userCurrentPosition!.longitude);
-    Circle userCircle = Circle(
-      visible: true,
-      circleId: const CircleId("userId"),
-      fillColor: Colors.transparent,
-      radius: 1000 * userRadius,
-      strokeWidth: 2,
-      strokeColor: Color.fromARGB(255, 99, 234, 249),
-      center: userLatLng,
-    );
-    setState(() {
-      circlesSet.add(userCircle);
-    });
-    print(userRadius);
-    CameraPosition cameraPosition =
-        CameraPosition(target: userLatLng, zoom: 14 - (userRadius / 3));
+  //   circlesSet.clear();
+  //   LatLng userLatLng =
+  //       LatLng(userCurrentPosition!.latitude, userCurrentPosition!.longitude);
+  //   Circle userCircle = Circle(
+  //     visible: true,
+  //     circleId: const CircleId("userId"),
+  //     fillColor: Colors.transparent,
+  //     radius: 1000 * userRadius,
+  //     strokeWidth: 2,
+  //     strokeColor: Color.fromARGB(255, 99, 234, 249),
+  //     center: userLatLng,
+  //   );
+  //   setState(() {
+  //     circlesSet.add(userCircle);
+  //   });
+  //   print(userRadius);
+  //   CameraPosition cameraPosition =
+  //       CameraPosition(target: userLatLng, zoom: 14 - (userRadius / 3));
 
-    newGoogleMapController!
-        .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-  }
+  //   newGoogleMapController!
+  //       .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+  // }
 
   displayActiveDriversOnUsersMap() {
     setState(() {

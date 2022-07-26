@@ -41,18 +41,18 @@ dependencies:
   google_maps_flutter: ^2.1.6
   location: ^4.4.0
   flutter_dotenv: ^5.0.2
-  firebase_core: ^1.17.1
+  firebase_core: ^1.19.2
   geoflutterfire: ^3.0.2
-  cloud_firestore: ^3.1.17
-  flutter_polyline_points: ^1.0.0
-  flutter_geofire: ^2.0.1
-  fluttertoast: ^8.0.9
+  cloud_firestore: ^3.3.0
+  firebase_auth: ^3.4.2
+  firebase_database: ^9.0.19
+  #flutter_geofire: ^2.0.1
+  firebase_messaging: ^12.0.0
   geolocator: ^8.2.1
+  fluttertoast: ^8.0.9
+  flutter_polyline_points: ^1.0.0
   provider: ^6.0.3
-  firebase_auth: ^3.3.19
-  firebase_database: ^9.0.15
   smooth_star_rating_nsafe: ^1.0.0+1
-  firebase_messaging: ^11.4.1
   flutter_local_notifications: ^9.6.0
   animated_text_kit: ^4.2.2
   geocoding: ^2.0.4
@@ -61,6 +61,8 @@ dependencies:
   country_code_picker: ^2.0.2
   image_picker: ^0.8.5+3
   permission_handler: ^10.0.0
+  mailer: ^5.2.0
+  firebase_storage: ^10.3.3
   
 
 dev_dependencies:

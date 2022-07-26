@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
+import 'package:icecream/Screens/EnterAddress.dart';
 import 'package:icecream/Screens/mapTest.dart';
 import 'package:icecream/mainScreens/main_screen.dart';
 import 'package:icecream/utils/size_config.dart';
@@ -76,6 +77,13 @@ class _AddAddressState extends State<AddAddress> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0)),
                 leading: Icon(Icons.home),
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (c) =>
+                              EnterAddress(type: 'home', isupdate: false)));
+                },
                 title: Text("Add Home"),
                 trailing: Icon(Icons.arrow_right_sharp),
                 tileColor: Color.fromARGB(255, 199, 199, 199),
@@ -84,6 +92,13 @@ class _AddAddressState extends State<AddAddress> {
                 height: 10,
               ),
               ListTile(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (c) =>
+                              EnterAddress(type: 'office', isupdate: false)));
+                },
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0)),
                 leading: Icon(Icons.factory),

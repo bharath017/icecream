@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:firebase_database/firebase_database.dart';
 import 'package:icecream/Screens/EnterMailorNumber.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:icecream/Screens/NumberScreen.dart';
 import 'package:icecream/Screens/UserDetailsScreen.dart';
+import 'package:icecream/global/global.dart';
+import 'package:icecream/mainScreens/main_screen.dart';
 //import 'package:drivers_app/Screens/UserDetailsScreen.dart';
 import 'package:icecream/utils/size_config.dart';
 import 'package:sms_autofill/sms_autofill.dart';
@@ -14,8 +17,13 @@ import 'package:sms_autofill/sms_autofill.dart';
 class VerifyNumberorMail extends StatefulWidget {
   String number;
   bool isMail;
+  String token;
 
-  VerifyNumberorMail({Key? key, required this.number, required this.isMail})
+  VerifyNumberorMail(
+      {Key? key,
+      required this.number,
+      required this.isMail,
+      required this.token})
       : super(key: key);
 
   @override
@@ -26,6 +34,7 @@ class _VerifyNumberState extends State<VerifyNumberorMail> {
   String _code = "";
   int OTP = 0;
   bool isValid = true;
+  DatabaseReference? driversRef;
   String signature = "{{ app signature }}";
   @override
   Widget build(BuildContext context) {
@@ -152,6 +161,32 @@ class _VerifyNumberState extends State<VerifyNumberorMail> {
   }
 
   verifyOTP(String pno, int OTP) async {
+    currentFirebaseUser!.updateEmail(pno);
+    driversRef = FirebaseDatabase.instance.ref().child("NumberVerification");
+    driversRef!.child(widget.token!).once().then((value) {
+      if ((value.snapshot.value as Map)['email'] == widget.number &&
+          (value.snapshot.value as Map)['code'] == OTP) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => UserDetails(number: pno)),
+        );
+      } else {
+        setState(() {
+          isValid = false;
+        });
+        final snackBar = SnackBar(
+          content: const Text('Faileddd...!!!'),
+          action: SnackBarAction(
+            label: 'Close',
+            onPressed: () {},
+          ),
+        );
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      }
+    });
+  }
+
+  verifyOTP1(String pno, int OTP) async {
     String url =
         "http://192.168.0.105:5000/SMS/verifyOTP?PhoneNumber=${pno}&OTP=${OTP}";
     final res = await post(Uri.parse(url));

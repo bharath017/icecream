@@ -10,18 +10,19 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart';
 import 'package:icecream/Screens/NumberScreen.dart';
 import 'package:icecream/global/global.dart';
+import 'package:icecream/mainScreens/main_screen.dart';
 //import 'package:icecream/Screens/UserDetailsScreen.dart';
 import 'package:icecream/utils/size_config.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server.dart';
 import 'package:sms_autofill/sms_autofill.dart';
 
-class VerifyNumber extends StatefulWidget {
+class LoginOTP extends StatefulWidget {
   String number;
   bool isMail;
   String? token;
 
-  VerifyNumber(
+  LoginOTP(
       {Key? key,
       required this.number,
       required this.isMail,
@@ -29,10 +30,10 @@ class VerifyNumber extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<VerifyNumber> createState() => _VerifyNumberState();
+  State<LoginOTP> createState() => _LoginOTPState();
 }
 
-class _VerifyNumberState extends State<VerifyNumber> {
+class _LoginOTPState extends State<LoginOTP> {
   String _code = "";
   int OTP = 0;
   bool isValid = true;
@@ -197,10 +198,7 @@ class _VerifyNumberState extends State<VerifyNumber> {
       // print(user.phoneNumber);
       Navigator.push(
         context,
-        MaterialPageRoute(
-            builder: (context) => EnterMailorNumber(
-                  isMail: widget.isMail,
-                )),
+        MaterialPageRoute(builder: (context) => MainScreen()),
       );
       Fluttertoast.showToast(msg: "Successfully signed in UID: ${user!.uid}");
     } catch (e) {
